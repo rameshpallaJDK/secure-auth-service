@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/jrtp_mini2
+    username: root
+    password: Ram@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update   # you created tables already; use 'update' only in dev if needed
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    secret: CHANGE_THIS_SECRET_TO_A_LONG_RANDOM_STRING
+    expiration-ms: 3600000
+
+logging:
+  level:
+    root: INFO
+    com.miniProj: DEBUG
+org.springframework.security: DEBUG
