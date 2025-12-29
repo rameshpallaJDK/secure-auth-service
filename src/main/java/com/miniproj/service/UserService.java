@@ -10,11 +10,9 @@ public interface UserService {
 	
 	  UserDTO registerUser(UserCreateDTO dto);
 	  UserDTO getUserById(Long id);
-	  //void resetPassword(Long userId, String oldPassword, String newPassword);
 	  void forceResetPassword(Long userId, String newPassword);
 	  LoginResponseDto login(LoginRequestDto dto);
-	  
-	  String resetPassword(PasswordResetDto dto);
+      String resetPassword(PasswordResetDto dto);
 
 	
 	

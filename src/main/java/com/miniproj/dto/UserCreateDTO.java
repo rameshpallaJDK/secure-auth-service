@@ -23,7 +23,6 @@ public class UserCreateDTO {
 	  private String countryName;
 	  private String stateName;
 	  private String cityName;
-	    
 	  private Boolean firstLogin;
 
 }

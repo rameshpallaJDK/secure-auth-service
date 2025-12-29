@@ -3,11 +3,10 @@ package com.miniproj.service;
 import java.time.Instant;
 import java.util.List;
 
-//import org.apache.tomcat.util.http.fileupload.RequestContext;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.web.servlet.support.RequestContext;
 
 import com.miniproj.dto.*;
 import com.miniproj.entity.*;
@@ -29,6 +28,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordHistoryRepository passwordHistoryRepo;
     private final PasswordEncoder passwordEncoder;
     private final LoginAuditRepository loginAuditRepo;
+    private final QuoteService quoteService;
+
+    private final EmailService emailService;
 
     // ----------------------------------------------------------------------
     // USER REGISTRATION
@@ -64,7 +66,18 @@ public class UserServiceImpl implements UserService {
         user.setCity(cityRepo.findById(dto.getCityId())
                 .orElseThrow(() -> new ResourceNotFoundException("City", "id", dto.getCityId())));
 
-        userRepo.save(user);
+        User savedUser = userRepo.save(user);
+
+        boolean emailSent=false;
+
+        if(savedUser.getEmail()!= null){
+            String subject = "Your First-Time Login Password";
+            String body = "Hello " + savedUser.getFullName()
+                    + "\n\nYour temporary password is: " + rawPwd
+                    + "\nPlease login and reset your password.";
+
+             emailSent = emailService.sendEmail(subject, body, savedUser.getEmail());
+        }
 
         // Response DTO
         return UserDTO.builder()
@@ -76,6 +89,7 @@ public class UserServiceImpl implements UserService {
                 .stateName(user.getState().getStateName())
                 .cityName(user.getCity().getCityName())
                 .firstLogin(true)
+                .emailSent(emailSent)
                 .build();
     }
 
@@ -107,19 +121,21 @@ public class UserServiceImpl implements UserService {
 
 
         if (Boolean.TRUE.equals(user.getFirstLogin())) {
-            return new LoginResponseDto(
-                    user.getUserId(),
-                    user.getFullName(),
-                    true,
-                    "Password reset required"
-            );
+            return LoginResponseDto.builder()
+                    .userId(user.getUserId())
+                    .fullName(user.getFullName())
+                    .firstLogin(true)
+                    .message("Password reset required")
+                    .build();
         }
+        QuoteResponseDto quote = quoteService.getRandomQuote();
 
         return new LoginResponseDto(
                 user.getUserId(),
                 user.getFullName(),
                 false,
-                "Login successful"
+                "Login successful",
+                quote
         );
     }
 
